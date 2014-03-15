@@ -1,0 +1,79 @@
+#!/bin/bash
+# bptool - an interactive tool to modify android build.prop files
+# Copyright (C) 2014  Chuck Davis <oldsoldier@gmal.com>
+
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,USA.
+clear
+echo "Welcome to BPTOOL, a quick build.prop updater for ROM Modders"
+echo "Current build.prop entries"
+echo "--------------------------"
+CROMNAME=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`
+CBUILD=`grep -i "ro.build.date" build.prop | head -n 1 | cut -d'=' -f2`
+CBUILDUTC=`grep -i "ro.build.date.utc" build.prop | head -n 1 | cut -d'=' -f2`
+CINCREMENTAL=`grep -i "ro.build.version.incremental" build.prop | head -n 1 | cut -d'=' -f2`
+echo "ROM name (ro.build.display.id): "$CROMNAME
+echo "Build date (ro.build.date): "$CBUILD
+echo "UTC build date (ro.build.date.utc): "$CBUILDUTC
+echo "Incremental version(ro.build.version.incremental): "$CINCREMENTAL
+echo
+echo "Make a selection"
+while :; do
+echo "1 - Change Rom name/version"
+echo "2 - Update build dates"
+echo "x - exit"
+
+echo -n "Selection: "
+read SELECTION
+	case "$SELECTION" in
+		"1")
+			echo "Enter new ROM name"
+			read NAME
+			sed -i "/ro.build.display.id/ c\ro.build.display.id=${NAME}" build.prop
+			echo ro.build.display.id changed to $NAME
+			;;
+		"2")
+			UTCDATE=`date +%s`
+			BUILDDATE=`date --date="@${UTCDATE}"`
+			INCREMENTAL=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`-`date +%Y%m%d.%H%M%S`
+			sed -i "/ro.build.version.incremental/ c\ro.build.version.incremental=${INCREMENTAL}" build.prop
+			echo "ro.build.version.incremental changed to $INCREMENTAL"
+			
+			sed -i "/ro.build.date.utc/ c\ro.build.date.utc=${UTCDATE}" build.prop
+			echo "ro.build.date.utc changed to $UTCDATE"
+			sed -i "/ro.build.date=/ c\ro.build.date=${BUILDDATE}" build.prop
+			echo "ro.build.date changed to $BUILDDATE"
+			;;
+		
+		"x")
+			echo "Thanks for using bptool"
+			echo "XDA thread:"
+			exit 0
+			;;
+		*)
+	esac
+done
+
+
+		
+
+
+
+
+
+
+
+
+
+
