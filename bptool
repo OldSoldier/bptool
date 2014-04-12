@@ -25,10 +25,11 @@ CBUILDUTC=`grep -i "ro.build.date.utc" build.prop | head -n 1 | cut -d'=' -f2`
 CINCREMENTAL=`grep -i "ro.build.version.incremental" build.prop | head -n 1 | cut -d'=' -f2`
 CPRODUCTMODEL=`grep -i "ro.product.model" build.prop | head -n 1 | cut -d'=' -f2`
 echo "ROM name (ro.build.display.id): "$CROMNAME
+echo "Product model/device Name (ro.product.model): "$CPRODUCTMODEL
 echo "Build date (ro.build.date): "$CBUILD
 echo "UTC build date (ro.build.date.utc): "$CBUILDUTC
 echo "Incremental version(ro.build.version.incremental): "$CINCREMENTAL
-echo "Product model/device Name (ro.product.model): "$CPRODUCTMODEL
+
 echo "Make a selection"
 while :; do
 echo "1 - Change ROM name/version"
@@ -44,12 +45,16 @@ read SELECTION
 			read NAME
 			sed -i "/ro.build.display.id/ c\ro.build.display.id=${NAME}" build.prop
 			echo ro.build.display.id changed to $NAME
+			# Reload from build prop in case user runs option again
+			CROMNAME=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`
 			;;
 		"2")
 			echo "Enter new product model /device name"
 			read PRODUCTMODEL
 			sed -i "/ro.product.model/ c\ro.product.model=${PRODUCTMODEL}" build.prop
 			echo ro.build.display.id changed to $PRODUCTMODEL
+			# Reload from build prop in case user runs option again
+			CPRODUCTMODEL=`grep -i "ro.product.model" build.prop | head -n 1 | cut -d'=' -f2`
 			;;
 		"3")
 			UTCDATE=`date +%s`
@@ -57,11 +62,16 @@ read SELECTION
 			INCREMENTAL=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`-`date +%Y%m%d.%H%M%S`
 			sed -i "/ro.build.version.incremental/ c\ro.build.version.incremental=${INCREMENTAL}" build.prop
 			echo "ro.build.version.incremental changed to $INCREMENTAL"
-			
+			# Reload from build prop in case user runs option again
+			CINCREMENTAL=`grep -i "ro.build.version.incremental" build.prop | head -n 1 | cut -d'=' -f2`
 			sed -i "/ro.build.date.utc/ c\ro.build.date.utc=${UTCDATE}" build.prop
 			echo "ro.build.date.utc changed to $UTCDATE"
+			# Reload from build prop in case user runs option again
 			sed -i "/ro.build.date=/ c\ro.build.date=${BUILDDATE}" build.prop
 			echo "ro.build.date changed to $BUILDDATE"
+			CBUILD=`grep -i "ro.build.date" build.prop | head -n 1 | cut -d'=' -f2`
+			# Reload from build prop in case user runs option again
+			CBUILDUTC=`grep -i "ro.build.date.utc" build.prop | head -n 1 | cut -d'=' -f2`
 			;;
 		
 		"x")
