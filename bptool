@@ -28,7 +28,7 @@ echo "ROM name (ro.build.display.id): "$CROMNAME
 echo "Build date (ro.build.date): "$CBUILD
 echo "UTC build date (ro.build.date.utc): "$CBUILDUTC
 echo "Incremental version(ro.build.version.incremental): "$CINCREMENTAL
-echo "Product model/device Name (ro.product.model): $CPRODUCTMODEL
+echo "Product model/device Name (ro.product.model): "$CPRODUCTMODEL
 echo "Make a selection"
 while :; do
 echo "1 - Change ROM name/version"
