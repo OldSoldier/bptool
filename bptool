@@ -23,15 +23,17 @@ CROMNAME=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`
 CBUILD=`grep -i "ro.build.date" build.prop | head -n 1 | cut -d'=' -f2`
 CBUILDUTC=`grep -i "ro.build.date.utc" build.prop | head -n 1 | cut -d'=' -f2`
 CINCREMENTAL=`grep -i "ro.build.version.incremental" build.prop | head -n 1 | cut -d'=' -f2`
+CPRODUCTMODEL=`grep -i "ro.product.model" build.prop | head -n 1 | cut -d'=' -f2`
 echo "ROM name (ro.build.display.id): "$CROMNAME
 echo "Build date (ro.build.date): "$CBUILD
 echo "UTC build date (ro.build.date.utc): "$CBUILDUTC
 echo "Incremental version(ro.build.version.incremental): "$CINCREMENTAL
-echo
+echo "Product model/device Name (ro.product.model): $CPRODUCTMODEL
 echo "Make a selection"
 while :; do
-echo "1 - Change Rom name/version"
-echo "2 - Update build dates"
+echo "1 - Change ROM name/version"
+echo "2 - Change product model / device name"
+echo "3 - Update build dates"
 echo "x - exit"
 
 echo -n "Selection: "
@@ -44,6 +46,12 @@ read SELECTION
 			echo ro.build.display.id changed to $NAME
 			;;
 		"2")
+			echo "Enter new product model /device name"
+			read PRODUCTMODEL
+			sed -i "/ro.product.model/ c\ro.product.model=${PRODUCTMODEL}" build.prop
+			echo ro.build.display.id changed to $PRODUCTMODEL
+			;;
+		"3")
 			UTCDATE=`date +%s`
 			BUILDDATE=`date --date="@${UTCDATE}"`
 			INCREMENTAL=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`-`date +%Y%m%d.%H%M%S`
