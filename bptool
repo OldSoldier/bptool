@@ -76,7 +76,7 @@ read SELECTION
 		
 		"x")
 			echo "Thanks for using bptool"
-			echo "XDA thread:http://forum.xda-developers.com/showthread.php?t=2682238"
+			echo "XDA thread- http://forum.xda-developers.com/showthread.php?t=2682238"
 			exit 0
 			;;
 		*)
