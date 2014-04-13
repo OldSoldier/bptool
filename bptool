@@ -1,5 +1,5 @@
 #!/bin/bash
-# bptool - an interactive tool to modify android build.prop files
+# bptool v2.0 - an interactive tool to modify android build.prop files
 # Copyright (C) 2014  Chuck Davis <oldsoldier@gmal.com>
 
 # This program is free software; you can redistribute it and/or
@@ -15,26 +15,61 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,USA.
+
+#declare array for build.prop.settings
+declare -a prop_settings
+
+#Populate array
+prop_settings[0]=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`
+prop_settings[1]=`grep -i "ro.product.model" build.prop | head -n 1 | cut -d'=' -f2`		
+prop_settings[2]=`grep -i "ro.build.date" build.prop | head -n 1 | cut -d'=' -f2`
+prop_settings[3]=`grep -i "ro.build.date.utc" build.prop | head -n 1 | cut -d'=' -f2`
+prop_settings[4]=`grep -i "ro.build.version.incremental" build.prop | head -n 1 | cut -d'=' -f2`
+
+#displays current prop settings
+function display_prop_settings(){
+					echo ""
+					echo "Current build.prop entries"
+					echo "--------------------------"
+					echo "ROM name (ro.build.display.id): "${prop_settings[0]}
+					echo "Product model/device Name (ro.product.model): "${prop_settings[1]}
+					echo "Build date (ro.build.date): "${prop_settings[2]}
+					echo "UTC build date (ro.build.date.utc): "${prop_settings[3]}
+					echo "Incremental version(ro.build.version.incremental): "${prop_settings[4]}
+					echo "--------------------------"
+					echo ""
+				}
+
+#exits and displays xda thread
+function quit_bptool(){
+			echo ""			
+			echo "Thanks for using bptool"
+			echo "XDA thread- http://forum.xda-developers.com/showthread.php?t=2682238"
+			echo ""
+			exit 0
+			}
+
+#start bptool
 clear
 echo "Welcome to BPTOOL, a quick build.prop updater for ROM Modders"
-echo "Current build.prop entries"
-echo "--------------------------"
-CROMNAME=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`
-CBUILD=`grep -i "ro.build.date" build.prop | head -n 1 | cut -d'=' -f2`
-CBUILDUTC=`grep -i "ro.build.date.utc" build.prop | head -n 1 | cut -d'=' -f2`
-CINCREMENTAL=`grep -i "ro.build.version.incremental" build.prop | head -n 1 | cut -d'=' -f2`
-CPRODUCTMODEL=`grep -i "ro.product.model" build.prop | head -n 1 | cut -d'=' -f2`
-echo "ROM name (ro.build.display.id): "$CROMNAME
-echo "Product model/device Name (ro.product.model): "$CPRODUCTMODEL
-echo "Build date (ro.build.date): "$CBUILD
-echo "UTC build date (ro.build.date.utc): "$CBUILDUTC
-echo "Incremental version(ro.build.version.incremental): "$CINCREMENTAL
+
+#check for build.prop
+
+if [ ! -f build.prop ];then
+	echo ""
+	echo "build.prop not found."
+	echo "Please execute this script from your working_directory/system dir."
+	quit_bptool
+fi
+
+display_prop_settings
 
 echo "Make a selection"
 while :; do
 echo "1 - Change ROM name/version"
 echo "2 - Change product model / device name"
 echo "3 - Update build dates"
+echo "v - View current settings"
 echo "x - exit"
 
 echo -n "Selection: "
@@ -45,53 +80,51 @@ read SELECTION
 			read NAME
 			sed -i "/ro.build.display.id/ c\ro.build.display.id=${NAME}" build.prop
 			echo ro.build.display.id changed to $NAME
-			# Reload from build prop in case user runs option again
-			CROMNAME=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`
+			#update array
+			prop_settings[0]=$NAME
 			;;
 		"2")
 			echo "Enter new product model /device name"
 			read PRODUCTMODEL
 			sed -i "/ro.product.model/ c\ro.product.model=${PRODUCTMODEL}" build.prop
 			echo ro.build.display.id changed to $PRODUCTMODEL
-			# Reload from build prop in case user runs option again
-			CPRODUCTMODEL=`grep -i "ro.product.model" build.prop | head -n 1 | cut -d'=' -f2`
+			#update array
+			prop_settings[1]=$PRODUCTMODEL
 			;;
 		"3")
+			#get dates
 			UTCDATE=`date +%s`
 			BUILDDATE=`date --date="@${UTCDATE}"`
-			INCREMENTAL=`grep -i "ro.build.display.id" build.prop | head -n 1 | cut -d'=' -f2`-`date +%Y%m%d.%H%M%S`
-			sed -i "/ro.build.version.incremental/ c\ro.build.version.incremental=${INCREMENTAL}" build.prop
-			echo "ro.build.version.incremental changed to $INCREMENTAL"
-			# Reload from build prop in case user runs option again
-			CINCREMENTAL=`grep -i "ro.build.version.incremental" build.prop | head -n 1 | cut -d'=' -f2`
-			sed -i "/ro.build.date.utc/ c\ro.build.date.utc=${UTCDATE}" build.prop
-			echo "ro.build.date.utc changed to $UTCDATE"
-			# Reload from build prop in case user runs option again
+			INCREMENTAL=${prop_settings[0]}-`date +%Y%m%d.%H%M%S`
+
+			#update build date	
 			sed -i "/ro.build.date=/ c\ro.build.date=${BUILDDATE}" build.prop
 			echo "ro.build.date changed to $BUILDDATE"
-			CBUILD=`grep -i "ro.build.date" build.prop | head -n 1 | cut -d'=' -f2`
-			# Reload from build prop in case user runs option again
-			CBUILDUTC=`grep -i "ro.build.date.utc" build.prop | head -n 1 | cut -d'=' -f2`
+			#update array
+			prop_settings[2]=$BUILDDATE
+			
+			# update UTC DATE			
+			sed -i "/ro.build.date.utc/ c\ro.build.date.utc=${UTCDATE}" build.prop
+			echo "ro.build.date.utc changed to $UTCDATE"
+			# update array
+			prop_settings[3]=$UTCDATE			
+
+			#update incremental build
+			sed -i "/ro.build.version.incremental/ c\ro.build.version.incremental=${INCREMENTAL}" build.prop
+			echo "ro.build.version.incremental changed to $INCREMENTAL"
+			# update array
+			prop_settings[4]=$INCREMENTAL
+			;;
+		"v")
+			display_prop_settings
 			;;
 		
 		"x")
-			echo "Thanks for using bptool"
-			echo "XDA thread- http://forum.xda-developers.com/showthread.php?t=2682238"
-			exit 0
+			quit_bptool
 			;;
 		*)
+			echo "Invalid selection. Please select from the following options:"
+			echo ""
+			;;
 	esac
 done
-
-
-		
-
-
-
-
-
-
-
-
-
-
